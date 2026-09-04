@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Vidéaste — Scrollytelling</title>
+  <style>
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════ */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    }
+    nav .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      transition: color 0.3s;
+    }
+    nav a:hover { color: #f0c040; }
+
+    /* ═══════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════ */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      background: url('https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1920') center/cover no-repeat;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .hero h1 span { color: #f0c040; }
+    .hero p {
+      font-size: 1.2rem;
+      color: #aaa;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      z-index: 1;
+      animation: bounce 2s infinite;
+    }
+    .scroll-indicator span {
+      display: block;
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid #f0c040;
+      border-bottom: 2px solid #f0c040;
+      transform: rotate(45deg);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(12px); }
+    }
+
+    /* ═══════════════════════════════════════════
+       SCROLLYTELLING SECTION
+    ═══════════════════════════════════════════ */
+    .scrollytelling {
+      position: relative;
+      padding: 8rem 2rem;
+    }
+    .scrollytelling .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .scrollytelling .text-block {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .scrollytelling .text-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .scrollytelling h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    .scrollytelling h2 span { color: #f0c040; }
+    .scrollytelling p {
+      font-size: 1.1rem;
+      color: #aaa;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .scrollytelling .media-block {
+      border-radius: 16px;
+      overflow: hidden;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .scrollytelling .media-block.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .scrollytelling .media-block img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    /* ═══════════════════════════════════════════
+       INFINITE SCROLLING — CARD STACK
+       (comme dans ton image)
+    ═══════════════════════════════════════════ */
+    .infinite-scroll-section {
+      padding: 6rem 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .infinite-scroll-section h2 {
+      text-align: center;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 3rem;
+      padding: 0 2rem;
+    }
+    .infinite-scroll-section h2 span { color: #f0c040; }
+
+    /* Le conteneur qui défile */
+    .scroll-track {
+      display: flex;
+      gap: 2rem;
+      width: max-content;
+      animation: scrollLeft 30s linear infinite;
+      padding: 2rem 0;
+    }
+    .scroll-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* Les cartes empilées */
+    .card-stack {
+      position: relative;
+      width: 380px;
+      height: 260px;
+      flex-shrink: 0;
+    }
+    .card-stack .card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transition: transform 0.4s ease;
+    }
+    .card-stack .card:nth-child(1) {
+      transform: translate(0, 0) rotate(0deg);
+      z-index: 3;
+    }
+    .card-stack .card:nth-child(2) {
+      transform: translate(12px, -12px) rotate(2deg);
+      z-index: 2;
+    }
+    .card-stack .card:nth-child(3) {
+      transform: translate(24px, -24px) rotate(4deg);
+      z-index: 1;
+    }
+    .card-stack:hover .card:nth-child(1) {
+      transform: translate(-8px, 8px) rotate(-2deg);
+    }
+    .card-stack:hover .card:nth-child(2) {
+      transform: translate(16px, -8px) rotate(3deg);
+    }
+    .card-stack:hover .card:nth-child(3) {
+      transform: translate(32px, -32px) rotate(6deg);
+    }
+    .card-stack .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-stack .card .card-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      color: white;
+    }
+    .card-stack .card .card-label h3 {
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+    .card-stack .card .card-label span {
+      font-size: 0.8rem;
+      color: #f0c040;
+    }
+
+    @keyframes scrollLeft {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ═══════════════════════════════════════════
+       PROJETS / SHOWREEL
+    ═══════════════════════════════════════════ */
+    .projects {
+      padding: 8rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .projects h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .projects h2 span { color: #f0c040; }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+    .project-card {
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      aspect-ratio: 16/9;
+    }
+    .project-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .project-card:hover img {
+      transform: scale(1.05);
+    }
+    .project-card .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem;
+    }
+    .project-card .overlay h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+    .project-card .overlay span {
+      color: #f0c040;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════
+       CONTACT
+    ═══════════════════════════════════════════ */
+    .contact {
+      padding: 8rem 2rem;
+      text-align: center;
+      background: linear-gradient(to bottom, #0a0a0a, #111);
+    }
+    .contact h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+    }
+    .contact p {
+      color: #aaa;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .contact a.btn {
+      display: inline-block;
+      padding: 1rem 3rem;
+      background: #f0c040;
+      color: #0a0a0a;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 50px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .contact a.btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(240,192,64,0.3);
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #555;
+      font-size: 0.85rem;
+      border-top: 1px solid #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="logo">TON NOM</div>
+    <ul>
+      <li><a href="#about">À propos</a></li>
+      <li><a href="#work">Projets</a></li>
+      <li><a href="#gallery">Galerie</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Je raconte des <span>histoires</span><br>en images</h1>
+      <p>Vidéaste & réalisateur — Clips, documentaires, films corporate</p>
+    </div>
+    <div class="scroll-indicator"><span></span></div>
+  </section>
+
+  <!-- SCROLLYTELLING : À PROPOS -->
+  <section class="scrollytelling" id="about">
+    <div class="container">
+      <div class="text-block" data-animate>
+        <h2>Chaque plan est une <span>émotion</span></h2>
+        <p>
+          Depuis 5 ans, je capture des moments bruts, des lumières naturelles
+          et des récits authentiques. Mon approche mêle documentaire et cinéma,
+          avec une obsession : la vérité du sujet.
+        </p>
+        <p>
+          Basé à Paris, disponible partout dans le monde.
+        </p>
+      </div>
+      <div class="media-block" data-animate>
+        <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800"
+             alt="Tournage" />
+      </div>
+    </div>
+  </section>
+
+  <!-- INFINITE SCROLLING — CARD STACK -->
+  <section class="infinite-scroll-section" id="gallery">
+    <h2>Travaux <span>récents</span></h2>
+
+    <!-- Piste qui défile (doublée pour boucle infinie) -->
+    <div class="scroll-track">
+      <!-- === GROUPE 1 === -->
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600" alt=""><div class="card-label"><h3>Clip musical</h3><span>2024</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1518929458113-99e19b9a4e4b?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600" alt=""><div class="card-label"><h3>Documentaire</h3><span>2024</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600" alt=""><div class="card-label"><h3>Film corporate</h3><span>2023</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1460881680858-30d872d5b530?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1505775561242-727b7fba20f0?w=600" alt=""><div class="card-label"><h3>Short film</h3><span>2023</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=600" alt=""></div>
+      </div>
+
+      <!-- === GROUPE 2 (identique pour boucle infinie) === -->
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600" alt=""><div class="card-label"><h3>Clip musical</h3><span>2024</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1518929458113-99e19b9a4e4b?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600" alt=""><div class="card-label"><h3>Documentaire</h3><span>2024</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600" alt=""><div class="card-label"><h3>Film corporate</h3><span>2023</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1460881680858-30d872d5b530?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?w=600" alt=""></div>
+      </div>
+      <div class="card-stack">
+        <div class="card"><img src="https://images.unsplash.com/photo-1505775561242-727b7fba20f0?w=600" alt=""><div class="card-label"><h3>Short film</h3><span>2023</span></div></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600" alt=""></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=600" alt=""></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJETS -->
+  <section class="projects" id="work">
+    <h2>Projets <span>sélectionnés</span></h2>
+    <div class="project-grid">
+      <div class="project-card">
+        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800" alt="">
+        <div class="overlay">
+          <span>Documentaire</span>
+          <h3>Les Oubliés de la Nuit</h3>
+        </div>
+      </div>
+      <div class="project-card">
+        <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800" alt="">
+        <div class="overlay">
+          <span>Clip musical</span>
+          <h3>Écho — Artiste X</h3>
+        </div>
+      </div>
+      <div class="project-card">
+        <img src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800" alt="">
+        <div class="overlay">
+          <span>Corporate</span>
+          <h3>Marque Y — Campaign 2024</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <h2>Travaillons ensemble</h2>
+    <p>Un projet en tête ? Parlons-en.</p>
+    <a href="mailto:ton@email.com" class="btn">Me contacter</a>
+  </section>
+
+  <footer>© 2026 — Ton Nom. Tous droits réservés.</footer>
+
+  <!-- ══════════════════════════════════════════
+       JAVASCRIPT — Animations au scroll
+  ═══════════════════════════════════════════ -->
+  <script>
+    // Intersection Observer pour les animations au scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('[data-animate]').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>
