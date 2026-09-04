@@ -4,94 +4,119 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portfolio Vidéaste — Scrollytelling</title>
-
-  <!-- Lightbox CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css">
-
   <style>
+    /* ══ DA : fond crème #f8f9f0 / encre bleu nuit #020c45 ══ */
+    :root { --bg:#f8f9f0; --ink:#020c45; }
     * { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { font-family:'Helvetica Neue',Arial,sans-serif; background:#0a0a0a; color:#f0f0f0; overflow-x:hidden; }
+    body { font-family:'Helvetica Neue',Arial,sans-serif; background:var(--bg); color:var(--ink); overflow-x:hidden; }
+    body.locked { overflow:hidden; }               /* verrou = la pile s'arrête */
+    ::selection { background:var(--ink); color:var(--bg); }
 
     /* ══ NAV ══ */
     nav { position:fixed; top:0; width:100%; z-index:1000; padding:1.5rem 3rem;
           display:flex; justify-content:space-between; align-items:center;
-          background:linear-gradient(to bottom, rgba(0,0,0,.8), transparent); }
+          background:linear-gradient(to bottom, rgba(248,249,240,.92), transparent); }
     nav .logo { font-size:1.4rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; }
     nav ul { list-style:none; display:flex; gap:2rem; }
-    nav a { color:#ccc; text-decoration:none; font-size:.9rem; letter-spacing:1px; transition:color .3s; }
-    nav a:hover { color:#f0c040; }
+    nav a { color:rgba(2,12,69,.65); text-decoration:none; font-size:.9rem; letter-spacing:1px; transition:color .3s; }
+    nav a:hover { color:var(--ink); }
 
     /* ══ HERO VIDÉO ══ */
     .hero { height:100vh; display:flex; flex-direction:column; justify-content:center;
             align-items:center; text-align:center; position:relative; background:#000; }
     .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    .hero::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,.6); }
-    .hero-content { position:relative; z-index:1; }
+    .hero::after { content:''; position:absolute; inset:0; background:rgba(2,12,69,.55); }
+    .hero-content { position:relative; z-index:1; color:#fff; }
     .hero h1 { font-size:clamp(2.5rem,6vw,5rem); font-weight:900; letter-spacing:-2px; line-height:1.1; margin-bottom:1rem; }
-    .hero h1 span { color:#f0c040; }
-    .hero p { font-size:1.2rem; color:#aaa; max-width:500px; margin:0 auto 2rem; }
+    .hero h1 span { color:var(--bg); font-style:italic; }
+    .hero p { font-size:1.2rem; color:rgba(248,249,240,.8); max-width:500px; margin:0 auto 2rem; }
     .scroll-indicator { position:absolute; bottom:2rem; z-index:1; animation:bounce 2s infinite; }
     .scroll-indicator span { display:block; width:24px; height:24px;
-          border-right:2px solid #f0c040; border-bottom:2px solid #f0c040; transform:rotate(45deg); }
+          border-right:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(45deg); }
     @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(12px)} }
+
+    /* ══ TITRES : mot surligné = pastille bleu nuit ══ */
+    h2 span { background:var(--ink); color:var(--bg); padding:.02em .3em; border-radius:.12em; }
 
     /* ══ SCROLLYTELLING ══ */
     .scrollytelling { padding:8rem 2rem; }
     .scrollytelling .container { max-width:1200px; margin:0 auto; display:grid;
           grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
     .scrollytelling h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:1.5rem; line-height:1.2; }
-    .scrollytelling h2 span { color:#f0c040; }
-    .scrollytelling p { font-size:1.1rem; color:#aaa; line-height:1.8; margin-bottom:1rem; }
+    .scrollytelling p { font-size:1.1rem; color:rgba(2,12,69,.65); line-height:1.8; margin-bottom:1rem; }
     .media-block { border-radius:16px; overflow:hidden; height:420px; }
     .media-block img { width:100%; height:120%; object-fit:cover; display:block; }
 
-    /* ══ GALERIE — PILE INFINIE SCROLL-DRIVEN ══ */
-    .stack-section { position:relative; height:700vh; background:#0a0a0a; }
+    /* ══ GALERIE — PILE INFINIE ══ */
+    .stack-section { position:relative; height:700vh; background:var(--bg); }
     .stack-sticky { position:sticky; top:0; height:100vh; display:flex; flex-direction:column;
           align-items:center; justify-content:center; gap:2.5rem; overflow:hidden; }
     .stack-head { width:min(90vw,860px); display:flex; justify-content:space-between; align-items:baseline; }
     .stack-head h2 { font-size:clamp(1.8rem,3.5vw,2.6rem); }
-    .stack-head h2 span { color:#f0c040; }
-    .stack-counter { color:#666; letter-spacing:2px; font-variant-numeric:tabular-nums; }
-    .stack { position:relative; width:min(90vw,860px); aspect-ratio:16/10; }
-    .stack-card { position:absolute; inset:0; border-radius:18px; overflow:hidden; background:#111;
-          box-shadow:0 30px 80px rgba(0,0,0,.65); will-change:transform,opacity; }
-    .stack-card img { width:100%; height:100%; object-fit:cover; display:block; }
+    .stack-counter { color:rgba(2,12,69,.5); letter-spacing:2px; font-variant-numeric:tabular-nums; }
+    .stack { position:relative; width:min(90vw,860px); aspect-ratio:16/10;
+             transition:transform .6s cubic-bezier(.16,1,.3,1), filter .6s; }
+    body.locked .stack { transform:scale(.94); filter:blur(3px); }  /* la pile "s'efface" doucement */
+    .stack-card { position:absolute; inset:0; border-radius:18px; overflow:hidden; background:#fff;
+          box-shadow:0 30px 80px rgba(2,12,69,.25); will-change:transform,opacity; cursor:pointer; }
+    .stack-card img { width:100%; height:100%; object-fit:cover; display:block; transition:filter .3s; }
+    .stack-card:hover img { filter:brightness(1.08); }
     .stack-card .stack-label { position:absolute; left:0; right:0; bottom:0; padding:1.4rem 1.6rem;
-          background:linear-gradient(to top, rgba(0,0,0,.85), transparent);
+          background:linear-gradient(to top, rgba(2,12,69,.85), transparent);
           display:flex; justify-content:space-between; align-items:baseline; }
     .stack-card .stack-label h3 { font-size:1.05rem; color:#fff; }
-    .stack-card .stack-label span { color:#f0c040; font-size:.85rem; }
-    .stack-hint { color:#555; font-size:.85rem; letter-spacing:1px; }
+    .stack-card .stack-label span { color:var(--bg); font-size:.85rem; }
+    .stack-hint { color:rgba(2,12,69,.45); font-size:.85rem; letter-spacing:1px; }
+
+    /* ══ MODALE PROJET (ouverte au clic) ══ */
+    .project-modal { position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center;
+          background:rgba(2,12,69,.55); backdrop-filter:blur(8px);
+          opacity:0; visibility:hidden; transition:opacity .45s ease, visibility .45s; }
+    .project-modal.open { opacity:1; visibility:visible; }
+    .modal-card { position:relative; width:min(92vw,900px); background:var(--bg); border-radius:20px; overflow:hidden;
+          box-shadow:0 40px 120px rgba(2,12,69,.45);
+          transform:scale(.85) translateY(30px); transition:transform .5s cubic-bezier(.16,1,.3,1); }
+    .project-modal.open .modal-card { transform:scale(1) translateY(0); }
+    .modal-card img { width:100%; height:min(52vh,480px); object-fit:cover; display:block; }
+    .modal-body { padding:1.6rem 2rem 1.8rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .modal-body h3 { font-size:1.5rem; }
+    .modal-body .year { color:rgba(2,12,69,.55); }
+    .modal-actions a { padding:.8rem 1.6rem; background:var(--ink); color:var(--bg); text-decoration:none;
+          border-radius:50px; font-weight:700; transition:transform .3s; }
+    .modal-actions a:hover { transform:translateY(-2px); }
+    .modal-close { position:absolute; top:1rem; right:1rem; width:42px; height:42px; border:none; border-radius:50%;
+          background:rgba(248,249,240,.92); color:var(--ink); font-size:1.1rem; cursor:pointer; }
 
     /* ══ PROJETS + LIGHTBOX ══ */
     .projects { padding:8rem 2rem; max-width:1200px; margin:0 auto; }
     .projects h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:3rem; text-align:center; }
-    .projects h2 span { color:#f0c040; }
     .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:2rem; }
     a.project-card { text-decoration:none; color:inherit; display:block; border-radius:16px;
           overflow:hidden; position:relative; aspect-ratio:16/9; }
     .project-card img { width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
     .project-card:hover img { transform:scale(1.05); }
     .project-card .overlay { position:absolute; inset:0; padding:2rem; display:flex; flex-direction:column;
-          justify-content:flex-end; background:linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 60%); }
-    .project-card .overlay h3 { font-size:1.3rem; margin-bottom:.5rem; }
-    .project-card .overlay span { color:#f0c040; font-size:.85rem; letter-spacing:1px; text-transform:uppercase; }
+          justify-content:flex-end; background:linear-gradient(to top, rgba(2,12,69,.9) 0%, transparent 60%); }
+    .project-card .overlay h3 { font-size:1.3rem; margin-bottom:.5rem; color:#fff; }
+    .project-card .overlay span { color:var(--bg); font-size:.85rem; letter-spacing:1px; text-transform:uppercase; }
 
-    /* ══ CONTACT ═ */
-    .contact { padding:8rem 2rem; text-align:center; background:linear-gradient(to bottom,#0a0a0a,#111); }
+    /* ══ CONTACT (bloc bleu nuit) ══ */
+    .contact { padding:8rem 2rem; text-align:center; background:var(--ink); color:var(--bg); }
     .contact h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:1rem; }
-    .contact > p { color:#aaa; font-size:1.1rem; margin-bottom:2rem; }
+    .contact > p { color:rgba(248,249,240,.7); font-size:1.1rem; margin-bottom:2rem; }
     .contact-form { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:1rem; text-align:left; }
-    .contact-form input,.contact-form textarea { padding:1rem 1.2rem; border-radius:12px; border:1px solid #222;
-          background:#111; color:#f0f0f0; font-family:inherit; font-size:1rem; }
-    .contact-form :focus { outline:none; border-color:#f0c040; }
-    .contact-form .btn { border:none; cursor:pointer; padding:1rem 3rem; background:#f0c040; color:#0a0a0a;
+    .contact-form input,.contact-form textarea { padding:1rem 1.2rem; border-radius:12px;
+          border:1px solid rgba(248,249,240,.25); background:rgba(248,249,240,.08);
+          color:var(--bg); font-family:inherit; font-size:1rem; }
+    .contact-form ::placeholder { color:rgba(248,249,240,.45); }
+    .contact-form :focus { outline:none; border-color:var(--bg); }
+    .contact-form .btn { border:none; cursor:pointer; padding:1rem 3rem; background:var(--bg); color:var(--ink);
           font-weight:700; font-size:1rem; border-radius:50px; transition:transform .3s; }
     .contact-form .btn:hover { transform:translateY(-3px); }
 
-    footer { text-align:center; padding:2rem; color:#555; font-size:.85rem; border-top:1px solid #1a1a1a; }
+    footer { text-align:center; padding:2rem; color:rgba(2,12,69,.55); font-size:.85rem; border-top:1px solid rgba(2,12,69,.12); }
 
     @media (max-width:800px) {
       nav { padding:1rem 1.5rem; } nav ul { gap:1rem; }
@@ -102,7 +127,7 @@
 <body>
 
   <nav>
-    <div class="logo">Loïc Fabre</div>
+    <div class="logo">TON NOM</div>
     <ul>
       <li><a href="#about">À propos</a></li>
       <li><a href="#gallery">Galerie</a></li>
@@ -111,7 +136,6 @@
     </ul>
   </nav>
 
-  <!-- HERO : remplace showreel.mp4 par ta vidéo (assets/videos/) -->
   <section class="hero">
     <video class="hero-video" autoplay muted loop playsinline>
       <source src="assets/videos/showreel.mp4" type="video/mp4">
@@ -123,7 +147,6 @@
     <div class="scroll-indicator"><span></span></div>
   </section>
 
-  <!-- SCROLLYTELLING -->
   <section class="scrollytelling" id="about">
     <div class="container">
       <div data-animate>
@@ -138,7 +161,6 @@
     </div>
   </section>
 
-  <!-- GALERIE PILE INFINIE -->
   <section class="stack-section" id="gallery">
     <div class="stack-sticky">
       <div class="stack-head">
@@ -146,11 +168,10 @@
         <div class="stack-counter" id="stackCounter">01 / 08</div>
       </div>
       <div class="stack" id="stack"></div>
-      <p class="stack-hint">Scroll pour faire défiler la pile ↓</p>
+      <p class="stack-hint">Scroll pour faire défiler • Clique sur une carte pour ouvrir le projet</p>
     </div>
   </section>
 
-  <!-- PROJETS (remplace les href par tes liens Vimeo/YouTube) -->
   <section class="projects" id="work">
     <h2>Projets <span>sélectionnés</span></h2>
     <div class="project-grid">
@@ -169,7 +190,6 @@
     </div>
   </section>
 
-  <!-- CONTACT (remplace TON_ID par ton ID Formspree) -->
   <section class="contact" id="contact">
     <h2>Travaillons ensemble</h2>
     <p>Un projet en tête ? Parlons-en.</p>
@@ -183,47 +203,57 @@
 
   <footer>© 2026 — Ton Nom. Tous droits réservés.</footer>
 
-  <!-- SCRIPTS -->
+  <!-- MODALE PROJET -->
+  <div class="project-modal" id="projectModal">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">✕</button>
+      <img id="modalImg" src="" alt="">
+      <div class="modal-body">
+        <div><h3 id="modalTitle"></h3><span class="year" id="modalYear"></span></div>
+        <div class="modal-actions"><a id="modalLink" href="#" target="_blank" rel="noopener">▶ Voir la vidéo</a></div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/js/glightbox.min.js"></script>
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    /* ── Apparitions hero + scroll ── */
     gsap.from('.hero h1', { y:60, opacity:0, duration:1.2, ease:'power3.out' });
     gsap.from('.hero p',  { y:40, opacity:0, duration:1,   ease:'power3.out', delay:.4 });
     gsap.utils.toArray('[data-animate]').forEach(el => {
       gsap.fromTo(el, { y:60, opacity:0 }, { y:0, opacity:1, duration:1, ease:'power3.out',
         scrollTrigger:{ trigger:el, start:'top 85%' } });
     });
-
-    /* ── Parallaxe images ── */
     gsap.utils.toArray('.media-block img').forEach(img => {
       gsap.to(img, { yPercent:15, ease:'none',
         scrollTrigger:{ trigger:img.parentElement, start:'top bottom', end:'bottom top', scrub:1 } });
     });
 
-    /* ── PILE INFINIE SCROLL-DRIVEN ── */
+    /* ── PILE INFINIE + CLIC ── */
     const stackImages = [
-      { src:'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200', title:'Clip musical', year:'2024' },
-      { src:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200', title:'Documentaire', year:'2024' },
-      { src:'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=1200', title:'Corporate',    year:'2023' },
-      { src:'https://images.unsplash.com/photo-1505775561242-727b7fba20f0?w=1200', title:'Short film',   year:'2023' },
-      { src:'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1200', title:'Clip — Nuit',  year:'2022' },
-      { src:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200', title:'Making-of',    year:'2022' },
-      { src:'https://images.unsplash.com/photo-1518929458113-99e19b9a4e4b?w=1200', title:'Pub',          year:'2021' },
-      { src:'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1200', title:'Portrait',     year:'2021' },
+      { src:'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200', title:'Clip musical', year:'2024', video:'https://vimeo.com/000000001' },
+      { src:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200', title:'Documentaire', year:'2024', video:'https://vimeo.com/000000002' },
+      { src:'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=1200', title:'Corporate',    year:'2023', video:'https://vimeo.com/000000003' },
+      { src:'https://images.unsplash.com/photo-1505775561242-727b7fba20f0?w=1200', title:'Short film',   year:'2023', video:'https://vimeo.com/000000004' },
+      { src:'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1200', title:'Clip — Nuit',  year:'2022', video:'https://vimeo.com/000000005' },
+      { src:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200', title:'Making-of',    year:'2022', video:'https://vimeo.com/000000006' },
+      { src:'https://images.unsplash.com/photo-1518929458113-99e19b9a4e4b?w=1200', title:'Pub',          year:'2021', video:'https://vimeo.com/000000007' },
+      { src:'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1200', title:'Portrait',     year:'2021', video:'https://vimeo.com/000000008' },
     ];
     const VISIBLE = 5, N = stackImages.length;
     const stackEl   = document.getElementById('stack');
     const counterEl = document.getElementById('stackCounter');
     const sectionEl = document.querySelector('.stack-section');
+    let currentIdx  = 0;
 
-    const cards = Array.from({ length: VISIBLE }, () => {
+    const cards = Array.from({ length: VISIBLE }, (_, p) => {
       const c = document.createElement('div');
       c.className = 'stack-card';
       c.innerHTML = `<img src="" alt=""><div class="stack-label"><h3></h3><span></span></div>`;
+      c.addEventListener('click', () => openModal(stackImages[(currentIdx + p) % N]));
       stackEl.appendChild(c);
       return c;
     });
@@ -237,6 +267,7 @@
       const t     = raw * N;
       const idx   = Math.floor(t) % N;
       const shift = ease(t - Math.floor(t));
+      currentIdx  = idx;
 
       cards.forEach((card, p) => {
         const data = stackImages[(idx + p) % N];
@@ -247,13 +278,14 @@
 
         const depth = p - shift;
         let y, scale, opacity;
-        if (p === 0) { y = -shift * 8;  scale = 1 + shift * .12;      opacity = 1 - shift; }
-        else         { y = -depth * 16; scale = 1 - depth * .035;     opacity = 1; }
+        if (p === 0) { y = -shift * 8;  scale = 1 + shift * .12;  opacity = 1 - shift; }
+        else         { y = -depth * 16; scale = 1 - depth * .035; opacity = 1; }
         if (p === VISIBLE - 1) opacity = Math.max(0, Math.min(1, 1 - (depth - (VISIBLE - 2))));
 
         card.style.transform = `translateY(${y}px) scale(${scale})`;
         card.style.opacity   = opacity;
         card.style.zIndex    = VISIBLE - p;
+        card.style.pointerEvents = (p === 0 && shift > .5) ? 'none' : 'auto';
       });
 
       counterEl.textContent = String(idx + 1).padStart(2,'0') + ' / ' + String(N).padStart(2,'0');
@@ -262,7 +294,24 @@
     addEventListener('resize', renderStack);
     renderStack();
 
-    /* ── Lightbox ── */
+    /* ── MODALE : ouvrir / fermer ── */
+    const modal = document.getElementById('projectModal');
+    function openModal(data) {
+      document.getElementById('modalImg').src   = data.src;
+      document.getElementById('modalTitle').textContent = data.title;
+      document.getElementById('modalYear').textContent  = data.year;
+      document.getElementById('modalLink').href = data.video;
+      modal.classList.add('open');
+      document.body.classList.add('locked');   // ← le scroll (et donc la pile) s'arrête
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.classList.remove('locked'); // ← ça repart, smooth
+    }
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
     GLightbox({ selector: '.glightbox' });
   </script>
 </body>
