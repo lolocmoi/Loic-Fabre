@@ -6,15 +6,13 @@
   <title>Portfolio Vidéaste — Scrollytelling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css">
   <style>
-    /* ══ DA : fond crème #f8f9f0 / encre bleu nuit #020c45 ══ */
     :root { --bg:#f8f9f0; --ink:#020c45; }
     * { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior:smooth; }
     body { font-family:'Helvetica Neue',Arial,sans-serif; background:var(--bg); color:var(--ink); overflow-x:hidden; }
-    body.locked { overflow:hidden; }               /* verrou = la pile s'arrête */
+    body.locked { overflow:hidden; }
     ::selection { background:var(--ink); color:var(--bg); }
 
-    /* ══ NAV ══ */
     nav { position:fixed; top:0; width:100%; z-index:1000; padding:1.5rem 3rem;
           display:flex; justify-content:space-between; align-items:center;
           background:linear-gradient(to bottom, rgba(248,249,240,.92), transparent); }
@@ -23,7 +21,6 @@
     nav a { color:rgba(2,12,69,.65); text-decoration:none; font-size:.9rem; letter-spacing:1px; transition:color .3s; }
     nav a:hover { color:var(--ink); }
 
-    /* ══ HERO VIDÉO ══ */
     .hero { height:100vh; display:flex; flex-direction:column; justify-content:center;
             align-items:center; text-align:center; position:relative; background:#000; }
     .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
@@ -37,19 +34,18 @@
           border-right:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(45deg); }
     @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(12px)} }
 
-    /* ══ TITRES : mot surligné = pastille bleu nuit ══ */
     h2 span { background:var(--ink); color:var(--bg); padding:.02em .3em; border-radius:.12em; }
 
-    /* ══ SCROLLYTELLING ══ */
     .scrollytelling { padding:8rem 2rem; }
     .scrollytelling .container { max-width:1200px; margin:0 auto; display:grid;
           grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
     .scrollytelling h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:1.5rem; line-height:1.2; }
     .scrollytelling p { font-size:1.1rem; color:rgba(2,12,69,.65); line-height:1.8; margin-bottom:1rem; }
     .media-block { border-radius:16px; overflow:hidden; height:420px; }
-    .media-block img { width:100%; height:120%; object-fit:cover; display:block; }
+    .media-block img { width:100%; height:120%; object-fit:cover; display:block;
+          filter:grayscale(100%); transition:filter .5s ease; }
+    .media-block img:hover { filter:grayscale(0%); }
 
-    /* ══ GALERIE — PILE INFINIE ══ */
     .stack-section { position:relative; height:700vh; background:var(--bg); }
     .stack-sticky { position:sticky; top:0; height:100vh; display:flex; flex-direction:column;
           align-items:center; justify-content:center; gap:2.5rem; overflow:hidden; }
@@ -58,11 +54,12 @@
     .stack-counter { color:rgba(2,12,69,.5); letter-spacing:2px; font-variant-numeric:tabular-nums; }
     .stack { position:relative; width:min(90vw,860px); aspect-ratio:16/10;
              transition:transform .6s cubic-bezier(.16,1,.3,1), filter .6s; }
-    body.locked .stack { transform:scale(.94); filter:blur(3px); }  /* la pile "s'efface" doucement */
+    body.locked .stack { transform:scale(.94); filter:blur(3px); }
     .stack-card { position:absolute; inset:0; border-radius:18px; overflow:hidden; background:#fff;
           box-shadow:0 30px 80px rgba(2,12,69,.25); will-change:transform,opacity; cursor:pointer; }
-    .stack-card img { width:100%; height:100%; object-fit:cover; display:block; transition:filter .3s; }
-    .stack-card:hover img { filter:brightness(1.08); }
+    .stack-card img { width:100%; height:100%; object-fit:cover; display:block;
+          filter:grayscale(100%); transition:filter .5s ease; }
+    .stack-card:hover img { filter:grayscale(0%); }
     .stack-card .stack-label { position:absolute; left:0; right:0; bottom:0; padding:1.4rem 1.6rem;
           background:linear-gradient(to top, rgba(2,12,69,.85), transparent);
           display:flex; justify-content:space-between; align-items:baseline; }
@@ -70,7 +67,6 @@
     .stack-card .stack-label span { color:var(--bg); font-size:.85rem; }
     .stack-hint { color:rgba(2,12,69,.45); font-size:.85rem; letter-spacing:1px; }
 
-    /* ══ MODALE PROJET (ouverte au clic) ══ */
     .project-modal { position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center;
           background:rgba(2,12,69,.55); backdrop-filter:blur(8px);
           opacity:0; visibility:hidden; transition:opacity .45s ease, visibility .45s; }
@@ -89,20 +85,19 @@
     .modal-close { position:absolute; top:1rem; right:1rem; width:42px; height:42px; border:none; border-radius:50%;
           background:rgba(248,249,240,.92); color:var(--ink); font-size:1.1rem; cursor:pointer; }
 
-    /* ══ PROJETS + LIGHTBOX ══ */
     .projects { padding:8rem 2rem; max-width:1200px; margin:0 auto; }
     .projects h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:3rem; text-align:center; }
     .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:2rem; }
     a.project-card { text-decoration:none; color:inherit; display:block; border-radius:16px;
           overflow:hidden; position:relative; aspect-ratio:16/9; }
-    .project-card img { width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
-    .project-card:hover img { transform:scale(1.05); }
+    .project-card img { width:100%; height:100%; object-fit:cover;
+          filter:grayscale(100%); transition:filter .5s ease, transform .6s ease; }
+    .project-card:hover img { filter:grayscale(0%); transform:scale(1.05); }
     .project-card .overlay { position:absolute; inset:0; padding:2rem; display:flex; flex-direction:column;
           justify-content:flex-end; background:linear-gradient(to top, rgba(2,12,69,.9) 0%, transparent 60%); }
     .project-card .overlay h3 { font-size:1.3rem; margin-bottom:.5rem; color:#fff; }
     .project-card .overlay span { color:var(--bg); font-size:.85rem; letter-spacing:1px; text-transform:uppercase; }
 
-    /* ══ CONTACT (bloc bleu nuit) ══ */
     .contact { padding:8rem 2rem; text-align:center; background:var(--ink); color:var(--bg); }
     .contact h2 { font-size:clamp(2rem,4vw,3rem); margin-bottom:1rem; }
     .contact > p { color:rgba(248,249,240,.7); font-size:1.1rem; margin-bottom:2rem; }
@@ -137,7 +132,7 @@
   </nav>
 
   <section class="hero">
-    <video class="hero-video" autoplay muted loop playsinline>
+    <video class="hero-video" autoplay muted loop playsinline poster="assets/images/hero-poster.jpg">
       <source src="assets/videos/showreel.mp4" type="video/mp4">
     </video>
     <div class="hero-content">
@@ -156,7 +151,7 @@
         <p>Basé à Paris, disponible partout dans le monde.</p>
       </div>
       <div class="media-block" data-animate>
-        <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800" alt="Tournage">
+        <img src="assets/images/about.jpg" alt="Tournage">
       </div>
     </div>
   </section>
@@ -176,15 +171,15 @@
     <h2>Projets <span>sélectionnés</span></h2>
     <div class="project-grid">
       <a href="https://vimeo.com/000000001" class="project-card glightbox">
-        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800" alt="">
+        <img src="assets/images/projet1.jpg" alt="">
         <div class="overlay"><span>Documentaire</span><h3>Les Oubliés de la Nuit</h3></div>
       </a>
       <a href="https://vimeo.com/000000002" class="project-card glightbox">
-        <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800" alt="">
+        <img src="assets/images/projet2.jpg" alt="">
         <div class="overlay"><span>Clip musical</span><h3>Écho — Artiste X</h3></div>
       </a>
       <a href="https://vimeo.com/000000003" class="project-card glightbox">
-        <img src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800" alt="">
+        <img src="assets/images/projet3.jpg" alt="">
         <div class="overlay"><span>Corporate</span><h3>Marque Y — Campaign</h3></div>
       </a>
     </div>
@@ -203,7 +198,6 @@
 
   <footer>© 2026 — Ton Nom. Tous droits réservés.</footer>
 
-  <!-- MODALE PROJET -->
   <div class="project-modal" id="projectModal">
     <div class="modal-card">
       <button class="modal-close" id="modalClose">✕</button>
@@ -232,16 +226,15 @@
         scrollTrigger:{ trigger:img.parentElement, start:'top bottom', end:'bottom top', scrub:1 } });
     });
 
-    /* ── PILE INFINIE + CLIC ── */
     const stackImages = [
-      { src:'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200', title:'Clip musical', year:'2024', video:'https://vimeo.com/000000001' },
-      { src:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200', title:'Documentaire', year:'2024', video:'https://vimeo.com/000000002' },
-      { src:'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=1200', title:'Corporate',    year:'2023', video:'https://vimeo.com/000000003' },
-      { src:'https://images.unsplash.com/photo-1505775561242-727b7fba20f0?w=1200', title:'Short film',   year:'2023', video:'https://vimeo.com/000000004' },
-      { src:'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1200', title:'Clip — Nuit',  year:'2022', video:'https://vimeo.com/000000005' },
-      { src:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200', title:'Making-of',    year:'2022', video:'https://vimeo.com/000000006' },
-      { src:'https://images.unsplash.com/photo-1518929458113-99e19b9a4e4b?w=1200', title:'Pub',          year:'2021', video:'https://vimeo.com/000000007' },
-      { src:'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1200', title:'Portrait',     year:'2021', video:'https://vimeo.com/000000008' },
+      { src:'assets/images/projet1.jpg', title:'Clip musical', year:'2024', video:'https://vimeo.com/000000001' },
+      { src:'assets/images/projet2.jpg', title:'Documentaire', year:'2024', video:'https://vimeo.com/000000002' },
+      { src:'assets/images/projet3.jpg', title:'Corporate',    year:'2023', video:'https://vimeo.com/000000003' },
+      { src:'assets/images/projet4.jpg', title:'Short film',   year:'2023', video:'https://vimeo.com/000000004' },
+      { src:'assets/images/projet5.jpg', title:'Clip — Nuit',  year:'2022', video:'https://vimeo.com/000000005' },
+      { src:'assets/images/projet6.jpg', title:'Making-of',    year:'2022', video:'https://vimeo.com/000000006' },
+      { src:'assets/images/projet7.jpg', title:'Pub',          year:'2021', video:'https://vimeo.com/000000007' },
+      { src:'assets/images/projet8.jpg', title:'Portrait',     year:'2021', video:'https://vimeo.com/000000008' },
     ];
     const VISIBLE = 5, N = stackImages.length;
     const stackEl   = document.getElementById('stack');
@@ -294,7 +287,6 @@
     addEventListener('resize', renderStack);
     renderStack();
 
-    /* ── MODALE : ouvrir / fermer ── */
     const modal = document.getElementById('projectModal');
     function openModal(data) {
       document.getElementById('modalImg').src   = data.src;
@@ -302,11 +294,11 @@
       document.getElementById('modalYear').textContent  = data.year;
       document.getElementById('modalLink').href = data.video;
       modal.classList.add('open');
-      document.body.classList.add('locked');   // ← le scroll (et donc la pile) s'arrête
+      document.body.classList.add('locked');
     }
     function closeModal() {
       modal.classList.remove('open');
-      document.body.classList.remove('locked'); // ← ça repart, smooth
+      document.body.classList.remove('locked');
     }
     document.getElementById('modalClose').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
